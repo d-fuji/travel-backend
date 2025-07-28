@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TravelsService } from './travels.service';
 import { CreateTravelDto, UpdateTravelDto } from './dto/travels.dto';
@@ -43,7 +43,8 @@ export class TravelsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.travelsService.remove(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string, @Request() req) {
+    await this.travelsService.remove(id, req.user.userId);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Travel, Prisma } from '@prisma/client';
 
@@ -154,8 +154,26 @@ export class TravelsService {
     });
   }
 
-  async remove(id: string): Promise<Travel> {
-    return this.prisma.travel.delete({
+  async remove(id: string, requestUserId: string): Promise<void> {
+    // 旅行が存在するかチェック
+    const travel = await this.prisma.travel.findUnique({
+      where: { id },
+      include: {
+        creator: true,
+      },
+    });
+
+    if (!travel) {
+      throw new NotFoundException('旅行が見つかりません');
+    }
+
+    // リクエストユーザーが旅行の作成者かチェック
+    if (travel.createdBy !== requestUserId) {
+      throw new ForbiddenException('旅行を削除する権限がありません。作成者のみ削除できます。');
+    }
+
+    // 権限チェックが通った場合のみ削除を実行
+    await this.prisma.travel.delete({
       where: { id },
     });
   }

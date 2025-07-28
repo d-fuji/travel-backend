@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MinLength } from 'class-validator';
+import { IsString, IsOptional, MinLength, IsEmail } from 'class-validator';
 
 export class CreateTravelGroupDto {
   @IsString()
@@ -14,6 +14,6 @@ export class UpdateTravelGroupDto {
 }
 
 export class AddMemberDto {
-  @IsString()
-  userId: string;
+  @IsEmail()
+  email: string;
 }

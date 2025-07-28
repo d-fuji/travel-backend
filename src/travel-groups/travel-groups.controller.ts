@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TravelGroupsService } from './travel-groups.service';
 import { CreateTravelGroupDto, UpdateTravelGroupDto, AddMemberDto } from './dto/travel-groups.dto';
@@ -27,22 +27,24 @@ export class TravelGroupsController {
   }
 
   @Post(':id/members')
-  addMember(@Param('id') id: string, @Body() addMemberDto: AddMemberDto) {
-    return this.travelGroupsService.addMember(id, addMemberDto.userId);
+  addMember(@Param('id') id: string, @Body() addMemberDto: AddMemberDto, @Request() req) {
+    return this.travelGroupsService.addMember(id, addMemberDto.email, req.user.userId);
   }
 
   @Delete(':id/members/:userId')
-  removeMember(@Param('id') id: string, @Param('userId') userId: string) {
-    return this.travelGroupsService.removeMember(id, userId);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  removeMember(@Param('id') id: string, @Param('userId') userId: string, @Request() req) {
+    return this.travelGroupsService.removeMember(id, userId, req.user.userId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTravelGroupDto: UpdateTravelGroupDto) {
-    return this.travelGroupsService.update(id, updateTravelGroupDto);
+  update(@Param('id') id: string, @Body() updateTravelGroupDto: UpdateTravelGroupDto, @Request() req) {
+    return this.travelGroupsService.update(id, updateTravelGroupDto, req.user.userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.travelGroupsService.remove(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id') id: string, @Request() req) {
+    await this.travelGroupsService.remove(id, req.user.userId);
   }
 }
