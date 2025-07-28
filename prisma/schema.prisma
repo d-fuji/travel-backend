@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdGroups   TravelGroup[] @relation("GroupCreator")
+  groupMemberships TravelGroupMember[]
+  createdTravels  Travel[]      @relation("TravelCreator")
+  itineraryItems  ItineraryItem[]
+  wishlistItems   WishlistItem[]
+
+  @@map("users")
+}
+
+model TravelGroup {
+  id        String   @id @default(cuid())
+  name      String
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  creator User                @relation("GroupCreator", fields: [createdBy], references: [id])
+  members TravelGroupMember[]
+  travels Travel[]
+
+  @@map("travel_groups")
+}
+
+model TravelGroupMember {
+  id      String @id @default(cuid())
+  groupId String
+  userId  String
+
+  // Relations
+  group TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("travel_group_members")
+}
+
+model Travel {
+  id          String   @id @default(cuid())
+  name        String
+  destination String
+  startDate   DateTime
+  endDate     DateTime
+  groupId     String
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  group          TravelGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creator        User            @relation("TravelCreator", fields: [createdBy], references: [id])
+  itineraryItems ItineraryItem[]
+  wishlistItems  WishlistItem[]
+
+  @@map("travels")
+}
+
+model ItineraryItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  location    String?
+  startTime   String?
+  endTime     String?
+  date        String
+  period      Period
+  travelId    String
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  travel  Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
+  creator User   @relation(fields: [createdBy], references: [id])
+
+  @@map("itinerary_items")
+}
+
+model WishlistItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  addedBy     String
+  travelId    String
+  isShared    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  travel Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [addedBy], references: [id])
+
+  @@map("wishlist_items")
+}
+
+enum Period {
+  morning
+  afternoon
+  evening
+}
