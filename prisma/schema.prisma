@@ -20,6 +20,7 @@ model User {
   createdExpenses  Expense[]           @relation("ExpenseCreator")
   paidExpenses     Expense[]           @relation("ExpensePaidBy")
   itineraryItems   ItineraryItem[]
+  uploadedImages   ItineraryImage[]
   groupMemberships TravelGroupMember[]
   createdGroups    TravelGroup[]       @relation("GroupCreator")
   createdTravels   Travel[]            @relation("TravelCreator")
@@ -73,7 +74,7 @@ model Travel {
 }
 
 model ItineraryItem {
-  id          String    @id @default(cuid())
+  id          String           @id @default(cuid())
   title       String
   description String?
   location    String?
@@ -84,11 +85,13 @@ model ItineraryItem {
   period      Period
   travelId    String
   createdBy   String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  mainImageId String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   expenses    Expense[]
-  creator     User      @relation(fields: [createdBy], references: [id])
-  travel      Travel    @relation(fields: [travelId], references: [id], onDelete: Cascade)
+  images      ItineraryImage[]
+  creator     User             @relation(fields: [createdBy], references: [id])
+  travel      Travel           @relation(fields: [travelId], references: [id], onDelete: Cascade)
 
   @@map("itinerary_items")
 }
@@ -186,6 +189,30 @@ model CategoryBudget {
 
   @@unique([budgetId, categoryId])
   @@map("category_budgets")
+}
+
+model ItineraryImage {
+  id               String        @id @default(cuid())
+  itineraryItemId  String
+  url              String
+  thumbnailUrl     String?
+  originalFileName String
+  mimeType         String
+  fileSize         Int
+  width            Int
+  height           Int
+  caption          String?
+  altText          String?
+  displayOrder     Int           @default(0)
+  isMain           Boolean       @default(false)
+  uploadedBy       String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  itineraryItem    ItineraryItem @relation(fields: [itineraryItemId], references: [id], onDelete: Cascade)
+  uploader         User          @relation(fields: [uploadedBy], references: [id])
+
+  @@index([itineraryItemId])
+  @@map("itinerary_images")
 }
 
 enum Period {

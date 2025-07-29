@@ -6,7 +6,7 @@ import { CreateTravelGroupDto, UpdateTravelGroupDto, AddMemberDto } from './dto/
 @Controller('travel-groups')
 @UseGuards(JwtAuthGuard)
 export class TravelGroupsController {
-  constructor(private readonly travelGroupsService: TravelGroupsService) {}
+  constructor(private readonly travelGroupsService: TravelGroupsService) { }
 
   @Post()
   create(@Body() createTravelGroupDto: CreateTravelGroupDto, @Request() req) {

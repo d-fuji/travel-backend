@@ -1,12 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ItineraryService } from './itinerary.service';
 import { CreateItineraryItemDto, UpdateItineraryItemDto } from './dto/itinerary.dto';
 
 @Controller('itinerary')
 @UseGuards(JwtAuthGuard)
+@UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class ItineraryController {
-  constructor(private readonly itineraryService: ItineraryService) {}
+  constructor(private readonly itineraryService: ItineraryService) { }
 
   @Post()
   create(@Body() createItineraryItemDto: CreateItineraryItemDto, @Request() req) {

@@ -54,6 +54,9 @@ export class ItineraryService {
           },
         },
         travel: true,
+        images: {
+          orderBy: { displayOrder: 'asc' },
+        },
       },
     });
   }
@@ -70,6 +73,9 @@ export class ItineraryService {
             name: true,
             avatar: true,
           },
+        },
+        images: {
+          orderBy: { displayOrder: 'asc' },
         },
       },
     });
@@ -88,6 +94,9 @@ export class ItineraryService {
           },
         },
         travel: true,
+        images: {
+          orderBy: { displayOrder: 'asc' },
+        },
       },
     });
   }
@@ -104,6 +113,9 @@ export class ItineraryService {
             name: true,
             avatar: true,
           },
+        },
+        images: {
+          orderBy: { displayOrder: 'asc' },
         },
       },
     });

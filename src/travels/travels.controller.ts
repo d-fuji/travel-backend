@@ -6,7 +6,7 @@ import { CreateTravelDto, UpdateTravelDto } from './dto/travels.dto';
 @Controller('travels')
 @UseGuards(JwtAuthGuard)
 export class TravelsController {
-  constructor(private readonly travelsService: TravelsService) {}
+  constructor(private readonly travelsService: TravelsService) { }
 
   @Post()
   create(@Body() createTravelDto: CreateTravelDto, @Request() req) {
@@ -33,12 +33,12 @@ export class TravelsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTravelDto: UpdateTravelDto) {
     const updateData: any = {};
-    
+
     if (updateTravelDto.name) updateData.name = updateTravelDto.name;
     if (updateTravelDto.destination) updateData.destination = updateTravelDto.destination;
     if (updateTravelDto.startDate) updateData.startDate = new Date(updateTravelDto.startDate);
     if (updateTravelDto.endDate) updateData.endDate = new Date(updateTravelDto.endDate);
-    
+
     return this.travelsService.update(id, updateData);
   }
 

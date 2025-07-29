@@ -1,4 +1,5 @@
 import { IsString, IsOptional, IsEnum, MinLength, IsUrl } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { Period } from '@prisma/client';
 
 export class CreateItineraryItemDto {
@@ -15,7 +16,8 @@ export class CreateItineraryItemDto {
   location?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'locationUrlは有効なURL形式である必要があります' })
+  @Transform(({ value }) => value === '' ? undefined : value)
   locationUrl?: string;
 
   @IsOptional()
@@ -51,7 +53,8 @@ export class UpdateItineraryItemDto {
   location?: string;
 
   @IsOptional()
-  @IsUrl()
+  @IsUrl({}, { message: 'locationUrlは有効なURL形式である必要があります' })
+  @Transform(({ value }) => value === '' ? undefined : value)
   locationUrl?: string;
 
   @IsOptional()

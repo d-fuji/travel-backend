@@ -8,6 +8,7 @@ import { TravelsModule } from './travels/travels.module';
 import { ItineraryModule } from './itinerary/itinerary.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ExpensesModule } from './expenses/expenses.module';
     ItineraryModule,
     WishlistModule,
     ExpensesModule,
+    ImagesModule,
   ],
 })
 export class AppModule {}
