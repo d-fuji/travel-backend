@@ -11,10 +11,23 @@ async function bootstrap() {
     transform: true,
   }));
   
+  // CORS configuration
+  const allowedOrigins = [
+    'http://localhost:3000', 
+    'http://localhost:3001',
+    'https://travel-kappa-ashy.vercel.app'
+  ];
+  
+  // Add any additional origins from environment variable
+  if (process.env.ALLOWED_ORIGINS) {
+    allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','));
+  }
+  
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
   
   const port = process.env.PORT || 3001;
