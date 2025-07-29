@@ -15,8 +15,8 @@ export class WishlistController {
       description: createWishlistItemDto.description,
       isShared: createWishlistItemDto.isShared || false,
       travel: { connect: { id: createWishlistItemDto.travelId } },
-      user: { connect: { id: req.user.userId } },
-    });
+      user: { connect: { id: req.user.id } },
+    }, req.user.id);
   }
 
   @Get()

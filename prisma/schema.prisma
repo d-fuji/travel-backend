@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,74 +8,72 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  createdGroups   TravelGroup[] @relation("GroupCreator")
+  id               String              @id @default(cuid())
+  email            String              @unique
+  name             String
+  password         String
+  avatar           String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  createdBudgets   Budget[]
+  expenseSplits    ExpenseSplit[]
+  createdExpenses  Expense[]           @relation("ExpenseCreator")
+  paidExpenses     Expense[]           @relation("ExpensePaidBy")
+  itineraryItems   ItineraryItem[]
   groupMemberships TravelGroupMember[]
-  createdTravels  Travel[]      @relation("TravelCreator")
-  itineraryItems  ItineraryItem[]
-  wishlistItems   WishlistItem[]
+  createdGroups    TravelGroup[]       @relation("GroupCreator")
+  createdTravels   Travel[]            @relation("TravelCreator")
+  wishlistItems    WishlistItem[]
 
   @@map("users")
 }
 
 model TravelGroup {
-  id        String   @id @default(cuid())
+  id        String              @id @default(cuid())
   name      String
   createdBy String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  creator User                @relation("GroupCreator", fields: [createdBy], references: [id])
-  members TravelGroupMember[]
-  travels Travel[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  members   TravelGroupMember[]
+  creator   User                @relation("GroupCreator", fields: [createdBy], references: [id])
+  travels   Travel[]
 
   @@map("travel_groups")
 }
 
 model TravelGroupMember {
-  id      String @id @default(cuid())
+  id      String      @id @default(cuid())
   groupId String
   userId  String
-
-  // Relations
-  group TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group   TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
   @@map("travel_group_members")
 }
 
 model Travel {
-  id          String   @id @default(cuid())
-  name        String
-  destination String
-  startDate   DateTime
-  endDate     DateTime
-  groupId     String
-  createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  group          TravelGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  creator        User            @relation("TravelCreator", fields: [createdBy], references: [id])
+  id             String          @id @default(cuid())
+  name           String
+  destination    String
+  startDate      DateTime
+  endDate        DateTime
+  groupId        String
+  createdBy      String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  budgets        Budget?
+  expenses       Expense[]
   itineraryItems ItineraryItem[]
+  creator        User            @relation("TravelCreator", fields: [createdBy], references: [id])
+  group          TravelGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   wishlistItems  WishlistItem[]
 
   @@map("travels")
 }
 
 model ItineraryItem {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String?
   location    String?
@@ -91,12 +83,11 @@ model ItineraryItem {
   period      Period
   travelId    String
   createdBy   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  travel  Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
-  creator User   @relation(fields: [createdBy], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expenses    Expense[]
+  creator     User      @relation(fields: [createdBy], references: [id])
+  travel      Travel    @relation(fields: [travelId], references: [id], onDelete: Cascade)
 
   @@map("itinerary_items")
 }
@@ -110,16 +101,99 @@ model WishlistItem {
   isShared    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
-  travel Travel @relation(fields: [travelId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [addedBy], references: [id])
+  user        User     @relation(fields: [addedBy], references: [id])
+  travel      Travel   @relation(fields: [travelId], references: [id], onDelete: Cascade)
 
   @@map("wishlist_items")
+}
+
+model ExpenseCategory {
+  id              String           @id @default(cuid())
+  name            String
+  color           String
+  icon            String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  categoryBudgets CategoryBudget[]
+  expenses        Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id              String          @id @default(cuid())
+  travelId        String
+  amount          Float
+  title           String
+  categoryId      String
+  paidBy          String
+  splitMethod     SplitMethod
+  date            DateTime
+  memo            String?
+  receiptImage    String?
+  itineraryItemId String?
+  createdBy       String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  splits          ExpenseSplit[]
+  category        ExpenseCategory @relation(fields: [categoryId], references: [id])
+  creator         User            @relation("ExpenseCreator", fields: [createdBy], references: [id])
+  itineraryItem   ItineraryItem?  @relation(fields: [itineraryItemId], references: [id])
+  payer           User            @relation("ExpensePaidBy", fields: [paidBy], references: [id])
+  travel          Travel          @relation(fields: [travelId], references: [id], onDelete: Cascade)
+
+  @@map("expenses")
+}
+
+model ExpenseSplit {
+  id        String   @id @default(cuid())
+  expenseId String
+  userId    String
+  amount    Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([expenseId, userId])
+  @@map("expense_splits")
+}
+
+model Budget {
+  id              String           @id @default(cuid())
+  travelId        String           @unique
+  totalBudget     Float?
+  createdBy       String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  creator         User             @relation(fields: [createdBy], references: [id])
+  travel          Travel           @relation(fields: [travelId], references: [id], onDelete: Cascade)
+  categoryBudgets CategoryBudget[]
+
+  @@map("budgets")
+}
+
+model CategoryBudget {
+  id         String          @id @default(cuid())
+  budgetId   String
+  categoryId String
+  amount     Float
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  budget     Budget          @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  category   ExpenseCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([budgetId, categoryId])
+  @@map("category_budgets")
 }
 
 enum Period {
   morning
   afternoon
   evening
+}
+
+enum SplitMethod {
+  equal
+  custom
 }

@@ -19,8 +19,8 @@ export class ItineraryController {
       date: createItineraryItemDto.date,
       period: createItineraryItemDto.period,
       travel: { connect: { id: createItineraryItemDto.travelId } },
-      creator: { connect: { id: req.user.userId } },
-    });
+      creator: { connect: { id: req.user.id } },
+    }, req.user.id);
   }
 
   @Get()

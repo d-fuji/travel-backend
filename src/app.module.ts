@@ -7,6 +7,7 @@ import { TravelGroupsModule } from './travel-groups/travel-groups.module';
 import { TravelsModule } from './travels/travels.module';
 import { ItineraryModule } from './itinerary/itinerary.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { ExpensesModule } from './expenses/expenses.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     TravelsModule,
     ItineraryModule,
     WishlistModule,
+    ExpensesModule,
   ],
 })
 export class AppModule {}

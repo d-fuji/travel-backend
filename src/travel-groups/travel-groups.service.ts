@@ -4,7 +4,7 @@ import { TravelGroup, Prisma } from '@prisma/client';
 
 @Injectable()
 export class TravelGroupsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(data: Prisma.TravelGroupCreateInput): Promise<TravelGroup> {
     // Create group and add creator as member in a transaction
