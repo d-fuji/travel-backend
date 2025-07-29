@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsEnum, MinLength, IsUrl } from 'class-validator';
 import { Period } from '@prisma/client';
 
 export class CreateItineraryItemDto {
@@ -13,6 +13,10 @@ export class CreateItineraryItemDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsUrl()
+  locationUrl?: string;
 
   @IsOptional()
   @IsString()
@@ -45,6 +49,10 @@ export class UpdateItineraryItemDto {
   @IsOptional()
   @IsString()
   location?: string;
+
+  @IsOptional()
+  @IsUrl()
+  locationUrl?: string;
 
   @IsOptional()
   @IsString()

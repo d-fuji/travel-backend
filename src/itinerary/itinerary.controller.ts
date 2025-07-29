@@ -14,6 +14,7 @@ export class ItineraryController {
       title: createItineraryItemDto.title,
       description: createItineraryItemDto.description,
       location: createItineraryItemDto.location,
+      locationUrl: createItineraryItemDto.locationUrl,
       startTime: createItineraryItemDto.startTime,
       endTime: createItineraryItemDto.endTime,
       date: createItineraryItemDto.date,
