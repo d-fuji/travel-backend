@@ -53,4 +53,4 @@ USER nestjs
 EXPOSE 8080
 
 # Start the application
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
