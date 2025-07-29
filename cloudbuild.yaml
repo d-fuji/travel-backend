@@ -45,7 +45,7 @@ steps:
       - '--concurrency'
       - '100'
       - '--timeout'
-      - '300'
+      - '500'
       - '--set-env-vars'
       - 'NODE_ENV=production'
       - '--set-secrets'
