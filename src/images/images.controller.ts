@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Delete,
-  Patch,
   Get,
   Param,
   Body,
@@ -12,14 +11,13 @@ import {
   UseGuards,
   ValidationPipe,
   UsePipes,
+  Request,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ImagesService } from './images.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   UploadImageDto,
-  UpdateImageDto,
-  SetMainImageDto,
   UploadImageResponseDto,
   ImageResponseDto
 } from './dto/images.dto';
@@ -35,27 +33,16 @@ export class ImagesController {
   async uploadImages(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() uploadImageDto: UploadImageDto,
+    @Request() req,
   ): Promise<UploadImageResponseDto> {
     if (!files || files.length === 0) {
       throw new BadRequestException('ファイルが選択されていません');
     }
 
-    // オプションのパース（フロントエンドからJSON文字列で送信される）
-    let options;
-    if (uploadImageDto.options) {
-      try {
-        options = JSON.parse(uploadImageDto.options);
-      } catch (error) {
-        // オプションのパースに失敗してもエラーにしない
-        console.warn('オプションのパースに失敗:', error);
-      }
-    }
-
     const images = await this.imagesService.uploadImages(
       files,
       uploadImageDto.itineraryItemId,
-      uploadImageDto.userId,
-      options
+      req.user.id
     );
 
     return { images };
@@ -64,20 +51,6 @@ export class ImagesController {
   @Delete(':imageId')
   async deleteImage(@Param('imageId') imageId: string): Promise<{ success: boolean }> {
     await this.imagesService.deleteImage(imageId);
-    return { success: true };
-  }
-
-  @Patch(':imageId')
-  async updateImage(
-    @Param('imageId') imageId: string,
-    @Body() updateImageDto: UpdateImageDto,
-  ): Promise<ImageResponseDto> {
-    return this.imagesService.updateImage(imageId, updateImageDto);
-  }
-
-  @Post('main')
-  async setMainImage(@Body() setMainImageDto: SetMainImageDto): Promise<{ success: boolean }> {
-    await this.imagesService.setMainImage(setMainImageDto);
     return { success: true };
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateImageDto, SetMainImageDto, ImageResponseDto } from './dto/images.dto';
+import { ImageResponseDto } from './dto/images.dto';
 import { createClient } from '@supabase/supabase-js';
 import { ConfigService } from '@nestjs/config';
 import * as sharp from 'sharp';
@@ -25,8 +25,7 @@ export class ImagesService {
   async uploadImages(
     files: Express.Multer.File[],
     itineraryItemId: string,
-    userId: string,
-    options?: any
+    userId: string
   ): Promise<ImageResponseDto[]> {
     // 旅程アイテムの存在確認
     const itineraryItem = await this.prisma.itineraryItem.findUnique({
@@ -131,61 +130,6 @@ export class ImagesService {
     });
   }
 
-  async updateImage(imageId: string, updateData: UpdateImageDto): Promise<ImageResponseDto> {
-    try {
-      console.log('画像更新リクエスト:', { imageId, updateData });
-
-      const image = await this.prisma.itineraryImage.findUnique({
-        where: { id: imageId }
-      });
-
-      if (!image) {
-        throw new NotFoundException('画像が見つかりません');
-      }
-
-      const updatedImage = await this.prisma.itineraryImage.update({
-        where: { id: imageId },
-        data: {
-          ...updateData,
-          updatedAt: new Date()
-        }
-      });
-
-      console.log('画像更新成功:', updatedImage);
-      return this.mapToDto(updatedImage);
-    } catch (error) {
-      console.error('画像更新エラー:', error);
-      throw error;
-    }
-  }
-
-  async setMainImage(setMainImageDto: SetMainImageDto): Promise<void> {
-    const { itineraryItemId, imageId } = setMainImageDto;
-
-    // トランザクションを使用して一貫性を保つ
-    await this.prisma.$transaction(async (tx) => {
-      // 現在のメイン画像を解除
-      await tx.itineraryImage.updateMany({
-        where: {
-          itineraryItemId,
-          isMain: true
-        },
-        data: { isMain: false }
-      });
-
-      // 新しいメイン画像を設定
-      await tx.itineraryImage.update({
-        where: { id: imageId },
-        data: { isMain: true }
-      });
-
-      // itineraryItemsテーブルも更新
-      await tx.itineraryItem.update({
-        where: { id: itineraryItemId },
-        data: { mainImageId: imageId }
-      });
-    });
-  }
 
   async getItemImages(itineraryItemId: string): Promise<ImageResponseDto[]> {
     const images = await this.prisma.itineraryImage.findMany({
