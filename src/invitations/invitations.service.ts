@@ -98,6 +98,14 @@ export class InvitationsService {
                 }
               }
             },
+            guestUsers: {
+              where: { isConverted: false },
+              select: {
+                tempId: true,
+                nickname: true,
+                joinedAt: true,
+              },
+            },
             travels: {
               select: { id: true, name: true, destination: true, startDate: true, endDate: true }
             }
@@ -123,7 +131,7 @@ export class InvitationsService {
       travels: invitationLink.group.travels,
       inviter: invitationLink.creator,
       customMessage: invitationLink.customMessage,
-      memberCount: invitationLink.group.members.length,
+      memberCount: invitationLink.group.members.length + (invitationLink.group.guestUsers?.length || 0),
       isValid: true
     };
   }

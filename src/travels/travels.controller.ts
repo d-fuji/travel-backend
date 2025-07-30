@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpCode, HttpStatus, ForbiddenException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TravelsService } from './travels.service';
 import { CreateTravelDto, UpdateTravelDto } from './dto/travels.dto';
@@ -10,6 +10,11 @@ export class TravelsController {
 
   @Post()
   create(@Body() createTravelDto: CreateTravelDto, @Request() req) {
+    // ゲストユーザーは旅程を作成できない
+    if (req.user.isGuest) {
+      throw new ForbiddenException('ゲストユーザーは旅程を作成できません');
+    }
+
     return this.travelsService.create({
       name: createTravelDto.name,
       destination: createTravelDto.destination,
@@ -37,7 +42,12 @@ export class TravelsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTravelDto: UpdateTravelDto) {
+  update(@Param('id') id: string, @Body() updateTravelDto: UpdateTravelDto, @Request() req) {
+    // ゲストユーザーは旅程を更新できない
+    if (req.user.isGuest) {
+      throw new ForbiddenException('ゲストユーザーは旅程を更新できません');
+    }
+
     const updateData: any = {};
 
     if (updateTravelDto.name) updateData.name = updateTravelDto.name;
@@ -51,6 +61,11 @@ export class TravelsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string, @Request() req) {
+    // ゲストユーザーは旅程を削除できない
+    if (req.user.isGuest) {
+      throw new ForbiddenException('ゲストユーザーは旅程を削除できません');
+    }
+
     await this.travelsService.remove(id, req.user.userId);
   }
 }

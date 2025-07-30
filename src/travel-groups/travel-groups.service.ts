@@ -66,6 +66,14 @@ export class TravelGroupsService {
               },
             },
           },
+          guestUsers: {
+            where: { isConverted: false },
+            select: {
+              tempId: true,
+              nickname: true,
+              joinedAt: true,
+            },
+          },
         },
       });
     });
@@ -176,6 +184,14 @@ export class TravelGroupsService {
                 avatar: true,
               },
             },
+          },
+        },
+        guestUsers: {
+          where: { isConverted: false },
+          select: {
+            tempId: true,
+            nickname: true,
+            joinedAt: true,
           },
         },
         travels: true,
@@ -334,6 +350,14 @@ export class TravelGroupsService {
                 avatar: true,
               },
             },
+          },
+        },
+        guestUsers: {
+          where: { isConverted: false },
+          select: {
+            tempId: true,
+            nickname: true,
+            joinedAt: true,
           },
         },
       },
