@@ -19,25 +19,30 @@ model User {
   expenseSplits    ExpenseSplit[]
   createdExpenses  Expense[]           @relation("ExpenseCreator")
   paidExpenses     Expense[]           @relation("ExpensePaidBy")
-  itineraryItems   ItineraryItem[]
   uploadedImages   ItineraryImage[]
+  itineraryItems   ItineraryItem[]
   groupMemberships TravelGroupMember[]
   createdGroups    TravelGroup[]       @relation("GroupCreator")
   createdTravels   Travel[]            @relation("TravelCreator")
   wishlistItems    WishlistItem[]
+  createdInvitationLinks InvitationLink[]
+  invitationUsages InvitationUsage[]
 
   @@map("users")
 }
 
 model TravelGroup {
-  id        String              @id @default(cuid())
-  name      String
-  createdBy String
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
-  members   TravelGroupMember[]
-  creator   User                @relation("GroupCreator", fields: [createdBy], references: [id])
-  travels   Travel[]
+  id               String               @id @default(cuid())
+  name             String
+  createdBy        String
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  members          TravelGroupMember[]
+  creator          User                 @relation("GroupCreator", fields: [createdBy], references: [id])
+  travels          Travel[]
+  invitationLinks  InvitationLink[]
+  invitationSettings InvitationSettings?
+  guestUsers       GuestUser[]
 
   @@map("travel_groups")
 }
@@ -78,16 +83,16 @@ model ItineraryItem {
   title       String
   description String?
   location    String?
-  locationUrl String?
   startTime   String?
   endTime     String?
   date        String
   period      Period
   travelId    String
   createdBy   String
-  mainImageId String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  locationUrl String?
+  mainImageId String?
   expenses    Expense[]
   images      ItineraryImage[]
   creator     User             @relation(fields: [createdBy], references: [id])
@@ -209,7 +214,7 @@ model ItineraryImage {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   itineraryItem    ItineraryItem @relation(fields: [itineraryItemId], references: [id], onDelete: Cascade)
-  uploader         User          @relation(fields: [uploadedBy], references: [id])
+  uploader         User          @relation(fields: [uploadedBy], references: [id], onDelete: NoAction)
 
   @@index([itineraryItemId])
   @@map("itinerary_images")
@@ -224,4 +229,73 @@ enum Period {
 enum SplitMethod {
   equal
   custom
+}
+
+model InvitationLink {
+  id            String            @id @default(cuid())
+  groupId       String
+  token         String            @unique
+  createdBy     String
+  customMessage String?
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  group         TravelGroup       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  creator       User              @relation(fields: [createdBy], references: [id])
+  usages        InvitationUsage[]
+
+  @@map("invitation_links")
+}
+
+model InvitationUsage {
+  id               String         @id @default(cuid())
+  invitationLinkId String
+  userId           String
+  usedAt           DateTime       @default(now())
+  success          Boolean
+  invitationLink   InvitationLink @relation(fields: [invitationLinkId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id])
+
+  @@map("invitation_usages")
+}
+
+model InvitationSettings {
+  id                String      @id @default(cuid())
+  groupId           String      @unique
+  allowMemberInvite Boolean     @default(false)
+  requireApproval   Boolean     @default(false)
+  allowGuestMode    Boolean     @default(true)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  group             TravelGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("invitation_settings")
+}
+
+model GuestUser {
+  id                String            @id @default(cuid())
+  tempId            String            @unique
+  nickname          String
+  groupId           String
+  deviceFingerprint String
+  joinedAt          DateTime          @default(now())
+  lastActiveAt      DateTime          @default(now())
+  isConverted       Boolean           @default(false)
+  convertedUserId   String?
+  group             TravelGroup       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  permissions       GuestPermission[]
+
+  @@map("guest_users")
+}
+
+model GuestPermission {
+  id          String    @id @default(cuid())
+  guestUserId String
+  action      String
+  allowed     Boolean   @default(true)
+  resource    String?
+  createdAt   DateTime  @default(now())
+  guestUser   GuestUser @relation(fields: [guestUserId], references: [id], onDelete: Cascade)
+
+  @@map("guest_permissions")
 }

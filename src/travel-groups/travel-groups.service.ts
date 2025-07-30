@@ -32,6 +32,16 @@ export class TravelGroupsService {
         },
       });
 
+      // Create default invitation settings for the group
+      await prisma.invitationSettings.create({
+        data: {
+          groupId: travelGroup.id,
+          allowMemberInvite: false,
+          requireApproval: false,
+          allowGuestMode: true,
+        },
+      });
+
       // Return the group with all members
       return prisma.travelGroup.findUnique({
         where: { id: travelGroup.id },
@@ -63,7 +73,47 @@ export class TravelGroupsService {
     return result;
   }
 
-  async findAll(userId: string): Promise<TravelGroup[]> {
+  async findAll(userId: string, isGuest: boolean = false, groupId?: string): Promise<TravelGroup[]> {
+    // ゲストユーザーの場合、参加しているグループのみ取得
+    if (isGuest && groupId) {
+      const group = await this.prisma.travelGroup.findUnique({
+        where: { id: groupId },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              avatar: true,
+            },
+          },
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+          guestUsers: {
+            where: { isConverted: false },
+            select: {
+              tempId: true,
+              nickname: true,
+              joinedAt: true,
+            },
+          },
+        },
+      });
+      
+      return group ? [group] : [];
+    }
+
+    // 通常ユーザーの場合
     return this.prisma.travelGroup.findMany({
       where: {
         OR: [
@@ -90,6 +140,14 @@ export class TravelGroupsService {
                 avatar: true,
               },
             },
+          },
+        },
+        guestUsers: {
+          where: { isConverted: false },
+          select: {
+            tempId: true,
+            nickname: true,
+            joinedAt: true,
           },
         },
       },

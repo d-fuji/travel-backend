@@ -38,16 +38,28 @@ export class TravelsService {
     });
   }
 
-  async findAll(userId: string): Promise<Travel[]> {
-    return this.prisma.travel.findMany({
-      where: {
+  async findAll(userId: string, isGuest: boolean = false, groupId?: string): Promise<Travel[]> {
+    let whereCondition: any;
+
+    if (isGuest && groupId) {
+      // ゲストユーザーの場合、参加しているグループの旅行のみ取得
+      whereCondition = {
+        groupId: groupId,
+      };
+    } else {
+      // 通常ユーザーの場合
+      whereCondition = {
         group: {
           OR: [
             { createdBy: userId },
             { members: { some: { userId } } },
           ],
         },
-      },
+      };
+    }
+
+    return this.prisma.travel.findMany({
+      where: whereCondition,
       include: {
         group: {
           include: {
@@ -61,6 +73,14 @@ export class TravelsService {
                     avatar: true,
                   },
                 },
+              },
+            },
+            guestUsers: {
+              where: { isConverted: false },
+              select: {
+                tempId: true,
+                nickname: true,
+                joinedAt: true,
               },
             },
           },

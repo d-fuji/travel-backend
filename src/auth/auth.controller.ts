@@ -1,6 +1,6 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { LoginDto, RegisterDto, GuestLoginDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,5 +18,19 @@ export class AuthController {
       registerDto.password,
       registerDto.name,
     );
+  }
+
+  @Post('guest-login')
+  async guestLogin(@Body(ValidationPipe) guestLoginDto: GuestLoginDto) {
+    return this.authService.guestLogin(
+      guestLoginDto.nickname,
+      guestLoginDto.deviceFingerprint,
+      guestLoginDto.groupId,
+    );
+  }
+
+  @Post('guest-refresh/:tempId')
+  async refreshGuestSession(@Param('tempId') tempId: string) {
+    return this.authService.refreshGuestSession(tempId);
   }
 }

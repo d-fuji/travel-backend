@@ -18,6 +18,12 @@ export class TravelGroupsController {
 
   @Get()
   findAll(@Request() req) {
+    // ゲストユーザーの場合
+    if (req.user.isGuest) {
+      return this.travelGroupsService.findAll(req.user.userId, true, req.user.groupId);
+    }
+    
+    // 通常ユーザーの場合
     return this.travelGroupsService.findAll(req.user.userId);
   }
 

@@ -22,6 +22,12 @@ export class TravelsController {
 
   @Get()
   findAll(@Request() req) {
+    // ゲストユーザーの場合
+    if (req.user.isGuest) {
+      return this.travelsService.findAll(req.user.userId, true, req.user.groupId);
+    }
+    
+    // 通常ユーザーの場合
     return this.travelsService.findAll(req.user.userId);
   }
 
