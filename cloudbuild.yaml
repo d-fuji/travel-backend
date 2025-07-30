@@ -45,7 +45,7 @@ steps:
       - '--concurrency'
       - '100'
       - '--timeout'
-      - '500'
+      - '300'
       - '--set-env-vars'
       - 'NODE_ENV=production'
       - '--set-secrets'
@@ -56,6 +56,10 @@ steps:
       - 'SUPABASE_URL=supabase-url:latest'
       - '--set-secrets'
       - 'SUPABASE_ANON_KEY=supabase-anon-key:latest'
+      - '--set-secrets'
+      - 'SUPABASE_SERVICE_ROLE_KEY=supabase-service-role-key:latest'
+      - '--set-env-vars'
+      - 'SUPABASE_STORAGE_BUCKET=travel-itinerary-images'
 
 options:
   logging: CLOUD_LOGGING_ONLY
