@@ -22,6 +22,7 @@ async function bootstrap() {
         /^http:\/\/localhost:\d+$/, // localhost with any port
         /^https:\/\/.*\.vercel\.app$/, // any Vercel deployment
         /^https:\/\/travel.*\.vercel\.app$/, // travel project on Vercel
+        /^https:\/\/tabimemo\.app$/, // tabimemo.app
       ];
 
       // Add custom patterns from environment variable
